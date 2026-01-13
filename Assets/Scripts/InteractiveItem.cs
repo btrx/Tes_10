@@ -1,14 +1,31 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class InteractiveItem : MonoBehaviour
 {
     // --- AREA INI NANTI AKAN KITA GANTI DENGAN SCRIPTABLE OBJECT ---
-    [Header("Hardcoded Data")]
-    public string itemName;
-    public enum ItemType { Potion, Coin, Trap }
-    public ItemType type;
-    public int valueAmount;
+    // [Header("Hardcoded Data")]
+    // public string itemName;
+    // public enum ItemType { Potion, Coin, Trap, Fruit }
+    // public ItemType type;
+    // public int valueAmount;
     // ----------------------------------------------------------------
+
+    // --- AREA SCRIPTABLE OBJECT ---
+    [Header("Scriptable Object Data")]
+    [SerializeField] private ItemDataObject itemData;
+    private SpriteRenderer spriteRenderer;
+
+    void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        if (itemData != null && spriteRenderer != null)
+        {
+            spriteRenderer.sprite = itemData.icon;
+        }
+    }
+
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -20,26 +37,53 @@ public class InteractiveItem : MonoBehaviour
 
     void ApplyEffect()
     {
-        // TODO 5: Lengkapi Switch Case ini
-        switch (type)
+        // // TODO 5: Lengkapi Switch Case ini
+        // // ----- Sebelum Scriptable Object -----
+
+        // switch (type)
+        // {
+        //     case ItemType.Potion:
+        //         Debug.Log($"Healed for {valueAmount}");
+        //         break;
+
+        //     case ItemType.Coin:
+        //         // Tampilkan Log: "Got Coin!"
+        //         Debug.Log("Got Coin!");
+        //         break;
+
+        //     case ItemType.Trap:
+        //         Debug.Log($"Damage taken: {valueAmount}");
+        //         break;
+
+        //     case ItemType.Fruit:
+        //         Debug.Log($"Got Score for {valueAmount} points!");
+        //         break;
+        // }
+
+        // // TODO 6: Logic destroy object (kecuali Trap)
+        // if (type != ItemType.Trap)
+        // {
+        //     // ...
+        //     Destroy(gameObject);    
+        // }
+
+        // ----- Sesudah Scriptable Object -----
+
+        switch (itemData.type)
         {
-            case ItemType.Potion:
-                Debug.Log($"Healed for {valueAmount}");
+            case InteractType.Buah:
+                Debug.Log($"<color=yellow>Harvested {itemData.itemName}!</color> Score +{itemData.effectValue}");
+                Destroy(gameObject);
                 break;
 
-            case ItemType.Coin:
-                // Tampilkan Log: "Got Coin!"
+            case InteractType.Heal:
+                Debug.Log($"<color=green>Used {itemData.itemName}!</color> Healed +{itemData.effectValue}");
+                Destroy(gameObject);
                 break;
-
-            case ItemType.Trap:
-                Debug.Log($"Damage taken: {valueAmount}");
+            
+            case InteractType.Trap:
+                Debug.Log($"<color=red>Hit by {itemData.itemName}!</color> Damage -{itemData.effectValue}");
                 break;
-        }
-
-        // TODO 6: Logic destroy object (kecuali Trap)
-        if (type != ItemType.Trap)
-        {
-            // ...
         }
     }
 }
