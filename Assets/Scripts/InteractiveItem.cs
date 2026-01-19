@@ -4,8 +4,8 @@ using UnityEngine.UIElements;
 public class InteractiveItem : MonoBehaviour
 {
     // --- SCRIPTABLE OBJECT METHOD ---
-    [SerializeField]
-    private ItemDataObject itemData;
+    [SerializeField] private ItemDataObject itemData;
+    private SpriteRenderer spriteRenderer;
 
     // --- OLD HARDCODED DATA (DEPRECATED) ---
     /*
@@ -17,6 +17,31 @@ public class InteractiveItem : MonoBehaviour
     */
     // -----------------------------------------------
 
+    void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    void Start()
+    {
+        if (itemData != null) UpdateVisual();
+    }
+
+    public void Configure(ItemDataObject dataFromSpawner)
+    {
+        itemData = dataFromSpawner;
+        UpdateVisual();
+    }
+    
+    void UpdateVisual()
+    {
+        if (spriteRenderer != null && itemData != null)
+        {
+            spriteRenderer.sprite = itemData.icon;
+            gameObject.name = itemData.itemName; // Ubah nama GameObject biar rapi
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -27,33 +52,55 @@ public class InteractiveItem : MonoBehaviour
 
     void ApplyEffect()
     {
-        // --- NEW METHOD USING SCRIPTABLE OBJECT ---
         if (itemData == null)
         {
             Debug.LogWarning("ItemDataObject is not assigned!");
             return;
         }
 
-        switch (itemData.type)
+        if (itemData is HarvestData harvest)
         {
-            case InteractType.Heal:
-                Debug.Log($"Healed for {itemData.effectValue}");
-                break;
-
-            case InteractType.Buah:
-                Debug.Log($"Got Score for {itemData.effectValue} points!");
-                break;
-
-            case InteractType.Trap:
-                Debug.Log($"Damage taken: {itemData.effectValue}");
-                break;
+            Debug.Log($"Got Score for {harvest.scoreBonus} points!");
+            Destroy(gameObject);
+            // Additional logic for collecting harvest items can go here
         }
-
-        // Destroy object (kecuali Trap)
-        if (itemData.type != InteractType.Trap)
+        else if (itemData is HazardData hazard)
         {
-            Destroy(gameObject);    
+            Debug.Log($"Damage taken: {hazard.damageAmount}");
+            // Additional logic for hazard effects can go here
         }
+        else 
+        {
+            Debug.LogWarning("Unknown ItemDataObject type!");
+        }
+        
+        // // --- NEW METHOD USING SCRIPTABLE OBJECT ---
+        // if (itemData == null)
+        // {
+        //     Debug.LogWarning("ItemDataObject is not assigned!");
+        //     return;
+        // }
+
+        // switch (itemData.type)
+        // {
+        //     case InteractType.Heal:
+        //         Debug.Log($"Healed for {itemData.effectValue}");
+        //         break;
+
+        //     case InteractType.Buah:
+        //         Debug.Log($"Got Score for {itemData.effectValue} points!");
+        //         break;
+
+        //     case InteractType.Trap:
+        //         Debug.Log($"Damage taken: {itemData.effectValue}");
+        //         break;
+        // }
+
+        // // Destroy object (kecuali Trap)
+        // if (itemData.type != InteractType.Trap)
+        // {
+        //     Destroy(gameObject);    
+        // }
 
         /*
         // --- OLD HARDCODED METHOD (DEPRECATED) ---
